@@ -89,10 +89,22 @@ function Home() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [editing, setEditing] = useState(false)
+  const [weather, setWeather] = useState(null)
 
   useEffect(() => {
     setStartDate(localStorage.getItem('tripStart') || '')
     setEndDate(localStorage.getItem('tripEnd') || '')
+    fetch('https://wttr.in/Honolulu?format=j1')
+      .then((res) => res.json())
+      .then((data) => {
+        const now = data.current_condition[0]
+        setWeather({
+          temp: now.temp_F,
+          text: now.weatherDesc[0].value,
+          humidity: now.humidity,
+        })
+      })
+      .catch(() => setWeather(null))
   }, [])
 
   function saveDates() {
@@ -121,6 +133,27 @@ function Home() {
           </p>
         )}
       </div>
+
+      <div className="mx-auto mt-8 max-w-[420px] rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-5 py-4 text-center">
+        <p className="text-sm uppercase tracking-widest text-[#1a7a78]">Honolulu today</p>
+        {!weather && <p className="mt-2 text-[#7a6d62]">Loading weather…</p>}
+        {weather && (
+          <>
+            <p className="mt-2 text-4xl font-semibold text-[#1a7a78]">{weather.temp}°F</p>
+            <p className="mt-1 text-lg">{weather.text}</p>
+            <p className="mt-1 text-sm text-[#7a6d62]">Humidity {weather.humidity}%</p>
+          </>
+        )}
+        <a
+          href="https://www.google.com/search?q=Honolulu+weather"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 inline-block text-sm text-[#1a7a78] underline"
+        >
+          Open Google Weather
+        </a>
+      </div>
+
       <div className="mt-5 text-center">
         <button type="button" onClick={() => setEditing(!editing)} className="text-sm text-[#1a7a78] underline">
           {editing ? 'Cancel' : 'Change dates'}
@@ -332,7 +365,7 @@ export default function App() {
             </div>
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
-            <NavLink to="/" className={linkClass}>Home</NavLink>
+            <NavLink to="/" className={linkClass}>Today</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
             <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>
             <NavLink to="/snorkel" className={linkClass}>Snorkel</NavLink>
