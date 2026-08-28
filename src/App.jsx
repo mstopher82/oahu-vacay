@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { auth, googleProvider } from './lib/firebase'
 
 const linkClass = ({ isActive }) =>
   isActive ? 'text-white' : 'text-white/60 hover:text-white'
@@ -53,6 +55,32 @@ function mapsEmbed(query) {
 
 function mapsLink(query) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
+function SignIn() {
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, setUser)
+  }, [])
+
+  if (user) {
+    return (
+      <button type="button" onClick={() => signOut(auth)} className="text-sm text-white/70 hover:text-white">
+        Sign out
+      </button>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => signInWithPopup(auth, googleProvider)}
+      className="text-sm text-[#1b9aaa] hover:text-white"
+    >
+      Sign in
+    </button>
+  )
 }
 
 function Home() {
@@ -196,7 +224,7 @@ function Tickets() {
 
   return (
     <div className="py-8">
-      <h1 className="text-3xl font-semibold">Tickets & plans</h1>
+      <h1 className="text-3xl font-semibold">Tickets and plans</h1>
       <p className="mt-2 text-white/70">Flights, Hanauma reservation, luau, car rental, etc.</p>
       <div className="mt-6 grid max-w-xl gap-3">
         <input type="text" placeholder="Name, example: Hanauma Bay reservation" value={name} onChange={(e) => setName(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
@@ -215,9 +243,7 @@ function Tickets() {
           <li key={item.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
             <div>
               <p className="text-lg">{item.name}</p>
-              <p className="text-sm text-[#1b9aaa]">
-                {item.status}{item.date ? ` · ${item.date}` : ''}{item.confirmation ? ` · #${item.confirmation}` : ''}
-              </p>
+              <p className="text-sm text-[#1b9aaa]">{item.status}</p>
             </div>
             <button type="button" onClick={() => removeTicket(item.id)} className="text-sm text-white/50 hover:text-white">Remove</button>
           </li>
@@ -250,7 +276,7 @@ function VoteList({ storageKey, list, title, subtitle }) {
               {item.skill && <p className="text-sm text-[#1b9aaa]">{item.skill} · {item.note}</p>}
             </div>
             <button type="button" onClick={() => upvote(item.id)} className="rounded-lg bg-[#1b9aaa] px-3 py-2 text-sm font-medium text-white">
-              ▲ {votes[item.id] || 0}
+              Up {votes[item.id] || 0}
             </button>
           </li>
         ))}
@@ -297,20 +323,24 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-[#071821]">
-        <header className="border-b border-white/10">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-            <span className="font-semibold tracking-wide">OʻAHU VACAY</span>
-            <nav className="flex flex-wrap gap-4 text-sm">
-              <NavLink to="/" className={linkClass}>Home</NavLink>
-              <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
-              <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>
-              <NavLink to="/snorkel" className={linkClass}>Snorkel</NavLink>
-              <NavLink to="/eats" className={linkClass}>Eats</NavLink>
-              <NavLink to="/vote" className={linkClass}>Vote</NavLink>
-            </nav>
+        <div className="sticky top-0 z-20">
+          <div className="hawaii-hero flex items-end justify-center pb-8">
+            <div className="relative z-10 text-center">
+              <p className="text-xs uppercase tracking-[0.35em] text-white/80">Aloha</p>
+              <h1 className="text-3xl font-semibold text-white">OAHU VACAY</h1>
+            </div>
           </div>
-        </header>
-        <main className="mx-auto max-w-5xl px-4">
+          <nav className="flex flex-wrap items-center justify-center gap-2 border-b border-white/10 bg-[#071821] px-3 py-3">
+            <NavLink to="/" className={linkClass}>Home</NavLink>
+            <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
+            <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>
+            <NavLink to="/snorkel" className={linkClass}>Snorkel</NavLink>
+            <NavLink to="/eats" className={linkClass}>Eats</NavLink>
+            <NavLink to="/vote" className={linkClass}>Vote</NavLink>
+            <SignIn />
+          </nav>
+        </div>
+        <main className="mx-auto max-w-5xl px-4 pb-16">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/itinerary" element={<Itinerary />} />
