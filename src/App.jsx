@@ -4,7 +4,9 @@ import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, googleProvider } from './lib/firebase'
 
 const linkClass = ({ isActive }) =>
-  isActive ? 'text-white' : 'text-white/60 hover:text-white'
+  isActive
+    ? 'rounded-full bg-[#1a7a78] px-4 py-2 text-sm text-white'
+    : 'rounded-full bg-[#e8e0d4] px-4 py-2 text-sm text-[#3a2f29]'
 
 const SNORKEL = [
   { id: 'hanauma', name: 'Hanauma Bay', skill: 'Beginner', note: 'Reserve ahead. Closed Mon–Tue.' },
@@ -66,7 +68,7 @@ function SignIn() {
 
   if (user) {
     return (
-      <button type="button" onClick={() => signOut(auth)} className="text-sm text-white/70 hover:text-white">
+      <button type="button" onClick={() => signOut(auth)} className="rounded-full bg-[#e8a0b0] px-4 py-2 text-sm text-white">
         Sign out
       </button>
     )
@@ -76,7 +78,7 @@ function SignIn() {
     <button
       type="button"
       onClick={() => signInWithPopup(auth, googleProvider)}
-      className="text-sm text-[#1b9aaa] hover:text-white"
+      className="rounded-full bg-[#e8a0b0] px-4 py-2 text-sm text-white"
     >
       Sign in
     </button>
@@ -102,38 +104,37 @@ function Home() {
   const days = daysUntil(startDate)
 
   return (
-    <div className="py-8">
-      <p className="text-sm uppercase tracking-widest text-[#1b9aaa]">Days until Oʻahu</p>
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-        {!startDate && <p className="text-2xl">No trip dates yet.</p>}
+    <div className="py-4">
+      <div className="countdown-card">
+        {!startDate && <p className="text-xl">No trip dates yet.</p>}
         {startDate && days > 0 && (
           <>
-            <p className="text-8xl font-semibold text-white">{days}</p>
-            <p className="mt-2 text-xl text-white/80">days to go</p>
+            <p className="countdown-num">{days}</p>
+            <p className="countdown-label">days to go</p>
           </>
         )}
-        {startDate && days === 0 && <p className="text-4xl">It’s today — aloha</p>}
-        {startDate && days < 0 && <p className="text-4xl">Trip already started</p>}
+        {startDate && days === 0 && <p className="text-3xl">It’s today — aloha</p>}
+        {startDate && days < 0 && <p className="text-3xl">Trip already started</p>}
+        {startDate && (
+          <p className="countdown-dates">
+            {startDate} — {endDate || 'end TBD'}
+          </p>
+        )}
       </div>
-      {startDate && (
-        <p className="mt-4 text-center text-white/70">
-          {startDate} → {endDate || 'end date TBD'}
-        </p>
-      )}
-      <div className="mt-6 text-center">
-        <button type="button" onClick={() => setEditing(!editing)} className="text-sm text-[#1b9aaa] underline">
+      <div className="mt-5 text-center">
+        <button type="button" onClick={() => setEditing(!editing)} className="text-sm text-[#1a7a78] underline">
           {editing ? 'Cancel' : 'Change dates'}
         </button>
       </div>
       {editing && (
         <div className="mx-auto mt-6 grid max-w-md gap-4">
           <label className="grid gap-1 text-sm">Start date
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
           </label>
           <label className="grid gap-1 text-sm">End date
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
           </label>
-          <button type="button" onClick={saveDates} className="rounded-lg bg-[#1b9aaa] px-4 py-2 font-medium text-white">Save dates</button>
+          <button type="button" onClick={saveDates} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Save dates</button>
         </div>
       )}
     </div>
@@ -168,24 +169,24 @@ function Itinerary() {
   }
 
   return (
-    <div className="py-8">
+    <div className="py-6">
       <h1 className="text-3xl font-semibold">Itinerary</h1>
-      <p className="mt-2 text-white/70">Add one plan at a time.</p>
+      <p className="mt-2 text-[#7a6d62]">Add one plan at a time.</p>
       <div className="mt-6 grid max-w-xl gap-3">
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <input type="text" placeholder="Example: Hanauma Bay snorkel" value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <button type="button" onClick={addItem} className="rounded-lg bg-[#1b9aaa] px-4 py-2 font-medium text-white">Add to itinerary</button>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <input type="text" placeholder="Example: Hanauma Bay snorkel" value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <button type="button" onClick={addItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Add to itinerary</button>
       </div>
       <ul className="mt-8 grid gap-3">
-        {items.length === 0 && <li className="text-white/60">Nothing planned yet.</li>}
+        {items.length === 0 && <li className="text-[#7a6d62]">Nothing planned yet.</li>}
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
             <div>
-              <p className="text-sm text-[#1b9aaa]">{item.date} {item.time}</p>
+              <p className="text-sm text-[#1a7a78]">{item.date} {item.time}</p>
               <p className="text-lg">{item.title}</p>
             </div>
-            <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-white/50 hover:text-white">Remove</button>
+            <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">Remove</button>
           </li>
         ))}
       </ul>
@@ -223,29 +224,29 @@ function Tickets() {
   }
 
   return (
-    <div className="py-8">
+    <div className="py-6">
       <h1 className="text-3xl font-semibold">Tickets and plans</h1>
-      <p className="mt-2 text-white/70">Flights, Hanauma reservation, luau, car rental, etc.</p>
+      <p className="mt-2 text-[#7a6d62]">Flights, Hanauma reservation, luau, car rental, etc.</p>
       <div className="mt-6 grid max-w-xl gap-3">
-        <input type="text" placeholder="Name, example: Hanauma Bay reservation" value={name} onChange={(e) => setName(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <input type="text" placeholder="Confirmation number (optional)" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black" />
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-lg border border-white/20 bg-white px-3 py-2 text-black">
+        <input type="text" placeholder="Name, example: Hanauma Bay reservation" value={name} onChange={(e) => setName(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <input type="text" placeholder="Confirmation number (optional)" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2">
           <option>Need to book</option>
           <option>Booked</option>
           <option>Paid</option>
         </select>
-        <button type="button" onClick={addTicket} className="rounded-lg bg-[#1b9aaa] px-4 py-2 font-medium text-white">Add ticket</button>
+        <button type="button" onClick={addTicket} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Add ticket</button>
       </div>
       <ul className="mt-8 grid gap-3">
-        {items.length === 0 && <li className="text-white/60">No tickets yet.</li>}
+        {items.length === 0 && <li className="text-[#7a6d62]">No tickets yet.</li>}
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
             <div>
               <p className="text-lg">{item.name}</p>
-              <p className="text-sm text-[#1b9aaa]">{item.status}</p>
+              <p className="text-sm text-[#1a7a78]">{item.status}</p>
             </div>
-            <button type="button" onClick={() => removeTicket(item.id)} className="text-sm text-white/50 hover:text-white">Remove</button>
+            <button type="button" onClick={() => removeTicket(item.id)} className="text-sm text-[#7a6d62]">Remove</button>
           </li>
         ))}
       </ul>
@@ -265,18 +266,18 @@ function VoteList({ storageKey, list, title, subtitle }) {
   const ranked = [...list].sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0))
 
   return (
-    <div className="py-8">
+    <div className="py-6">
       <h1 className="text-3xl font-semibold">{title}</h1>
-      <p className="mt-2 text-white/70">{subtitle}</p>
+      <p className="mt-2 text-[#7a6d62]">{subtitle}</p>
       <ul className="mt-8 grid gap-3">
         {ranked.map((item) => (
-          <li key={item.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
             <div>
               <p className="text-lg">{item.name}</p>
-              {item.skill && <p className="text-sm text-[#1b9aaa]">{item.skill} · {item.note}</p>}
+              {item.skill && <p className="text-sm text-[#1a7a78]">{item.skill} · {item.note}</p>}
             </div>
-            <button type="button" onClick={() => upvote(item.id)} className="rounded-lg bg-[#1b9aaa] px-3 py-2 text-sm font-medium text-white">
-              Up {votes[item.id] || 0}
+            <button type="button" onClick={() => upvote(item.id)} className="rounded-full bg-[#1a7a78] px-3 py-2 text-sm text-white">
+              ♥ {votes[item.id] || 0}
             </button>
           </li>
         ))}
@@ -289,14 +290,14 @@ function Eats() {
   const [active, setActive] = useState(RESTAURANTS[0])
 
   return (
-    <div className="py-8">
+    <div className="py-6">
       <h1 className="text-3xl font-semibold">Eats</h1>
-      <p className="mt-2 text-white/70">Click a restaurant. Map updates. Open in Google Maps for directions.</p>
-      <iframe title="Restaurant map" src={mapsEmbed(active.query)} className="mt-6 h-72 w-full rounded-xl border-0" />
-      <p className="mt-3 text-sm text-white/70">
-        Showing <span className="text-white">{active.name}</span> · {active.area}
+      <p className="mt-2 text-[#7a6d62]">Click a restaurant. Map updates.</p>
+      <iframe title="Restaurant map" src={mapsEmbed(active.query)} className="mt-6 h-72 w-full rounded-2xl border-0" />
+      <p className="mt-3 text-sm text-[#7a6d62]">
+        Showing <span className="text-[#3a2f29]">{active.name}</span> · {active.area}
       </p>
-      <a href={mapsLink(active.query)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[#1b9aaa] underline">
+      <a href={mapsLink(active.query)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[#1a7a78] underline">
         Open in Google Maps
       </a>
       <ul className="mt-8 grid gap-3">
@@ -305,12 +306,12 @@ function Eats() {
             <button
               type="button"
               onClick={() => setActive(place)}
-              className={`w-full rounded-xl border px-4 py-3 text-left ${
-                active.id === place.id ? 'border-[#1b9aaa] bg-white/10' : 'border-white/10 bg-white/5'
+              className={`w-full rounded-2xl border px-4 py-3 text-left ${
+                active.id === place.id ? 'border-[#1a7a78] bg-[#f7f2e9]' : 'border-[#e7dccb] bg-white'
               }`}
             >
               <p className="text-lg">{place.name}</p>
-              <p className="text-sm text-[#1b9aaa]">{place.area}</p>
+              <p className="text-sm text-[#1a7a78]">{place.area}</p>
             </button>
           </li>
         ))}
@@ -322,15 +323,15 @@ function Eats() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#071821]">
-        <div className="sticky top-0 z-20">
-          <div className="hawaii-hero flex items-end justify-center pb-8">
-            <div className="relative z-10 text-center">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/80">Aloha</p>
-              <h1 className="text-3xl font-semibold text-white">OAHU VACAY</h1>
+      <div className="min-h-screen bg-[#f3eee4] text-[#3a2f29]">
+        <div className="sticky top-0 z-20 bg-[#f3eee4]">
+          <div className="hawaii-hero">
+            <div>
+              <p className="aloha">Aloha</p>
+              <h1 className="title">Oahu Vacay</h1>
             </div>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-2 border-b border-white/10 bg-[#071821] px-3 py-3">
+          <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
             <NavLink to="/" className={linkClass}>Home</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
             <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>

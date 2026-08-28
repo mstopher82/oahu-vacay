@@ -3,18 +3,72 @@
 body {
   margin: 0;
   color: #3a2f29;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  background: #efe6d6;
+  font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+  background: #f3eee4;
 }
 
 .hawaii-hero {
-  height: 42vh;
-  min-height: 240px;
+  height: 46vh;
+  min-height: 280px;
   position: relative;
-  overflow: hidden;
-  background-image:
-    linear-gradient(180deg, rgba(20, 10, 20, 0.05), rgba(239, 230, 214, 0.2) 70%, #efe6d6 100%),
-    url("/hero.jpg");
-  background-size: cover;
-  background-position: center 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  background:
+    linear-gradient(180deg, rgba(20, 10, 20, 0.18), rgba(243, 238, 228, 0.12) 75%),
+    url("/hero.jpg?v=2") center 55% / cover no-repeat;
+  clip-path: ellipse(130% 100% at 50% 0%);
+}
+
+.aloha {
+  font-family: "Great Vibes", "Segoe Script", cursive;
+  font-size: 64px;
+  line-height: 1;
+  color: #f4b4c2;
+  margin: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 42px;
+  letter-spacing: 0.22em;
+  margin: 6px 0 0;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.4);
+}
+
+.countdown-card {
+  margin: 28px auto 0;
+  max-width: 420px;
+  background: #f7f2e9;
+  border: 1px solid #e7dccb;
+  border-radius: 28px;
+  padding: 36px 24px 28px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(80, 50, 40, 0.06);
+}
+
+.countdown-num {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 108px;
+  line-height: 0.9;
+  color: #1a7a78;
+  margin: 0;
+}
+
+.countdown-label {
+  color: #e28b96;
+  font-size: 28px;
+  margin: 8px 0 18px;
+}
+
+.countdown-dates {
+  color: #7a6d62;
+  letter-spacing: 0.16em;
+  font-size: 12px;
+  text-transform: uppercase;
 }
