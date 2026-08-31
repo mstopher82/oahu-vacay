@@ -27,12 +27,11 @@ const ACTIVITIES = [
 ]
 
 const RESTAURANTS = [
-  { id: 'helenas', name: "Helena's Hawaiian Food", area: 'Kalihi', query: "Helena's Hawaiian Food Honolulu" },
-  { id: 'marukame', name: 'Marukame Udon', area: 'Waikiki', query: 'Marukame Udon Waikiki' },
-  { id: 'nicolas', name: "Nico's Pier 38", area: 'Honolulu', query: "Nico's Pier 38 Honolulu" },
-  { id: 'giovannis', name: "Giovanni's Shrimp Truck", area: 'North Shore', query: "Giovanni's Shrimp Truck Kahuku" },
-  { id: 'teds', name: "Ted's Bakery", area: 'North Shore', query: "Ted's Bakery Sunset Beach" },
-  { id: 'highway', name: 'Highway Inn', area: 'Kakaako', query: 'Highway Inn Kakaako' },
+  { id: 'south', name: 'South Shore', area: 'South Shore', query: 'restaurants South Shore Honolulu Oahu' },
+  { id: 'north', name: 'North Shore', area: 'North Shore', query: 'restaurants North Shore Oahu' },
+  { id: 'windward', name: 'Windward Coast', area: 'Windward Coast', query: 'restaurants Windward Oahu' },
+  { id: 'leeward', name: 'Leeward Coast', area: 'Leeward Coast', query: 'restaurants Leeward Coast Oahu' },
+  { id: 'central', name: 'Central Oahu', area: 'Central Oahu', query: 'restaurants Central Oahu' },
 ]
 
 function daysUntil(startDate) {
@@ -84,6 +83,20 @@ function SignIn() {
     </button>
   )
 }
+function weatherText(code) {
+  const n = Number(code)
+  if (n === 0) return 'Clear'
+  if (n === 1) return 'Mainly clear'
+  if (n === 2) return 'Partly cloudy'
+  if (n === 3) return 'Overcast'
+  if (n === 45 || n === 48) return 'Fog'
+  if (n >= 51 && n <= 57) return 'Drizzle'
+  if (n >= 61 && n <= 67) return 'Rain'
+  if (n >= 71 && n <= 77) return 'Snow'
+  if (n >= 80 && n <= 82) return 'Rain showers'
+  if (n >= 95) return 'Thunder'
+  return 'Partly cloudy'
+}
 function weatherEmoji(text) {
   const t = (text || '').toLowerCase()
   if (t.includes('thunder')) return '⛈️'
@@ -103,16 +116,16 @@ function Home() {
   useEffect(() => {
     setStartDate(localStorage.getItem('tripStart') || '')
     setEndDate(localStorage.getItem('tripEnd') || '')
-    fetch('https://wttr.in/Honolulu?format=j1')
-      .then((res) => res.json())
-      .then((data) => {
-        const now = data.current_condition[0]
-        setWeather({
-          temp: now.temp_F,
-          text: now.weatherDesc[0].value,
-          humidity: now.humidity,
-        })
-      })
+fetch('https://api.open-meteo.com/v1/forecast?latitude=21.31&longitude=-157.86&current=temperature_2m,relative_humidity_2m,weather_code&temperature_unit=fahrenheit')
+  .then((res) => res.json())
+  .then((data) => {
+    const now = data.current
+    setWeather({
+      temp: Math.round(now.temperature_2m),
+      text: weatherText(now.weather_code),
+      humidity: now.relative_humidity_2m,
+    })
+  })
       .catch(() => setWeather(null))
   }, [])
 
@@ -213,7 +226,7 @@ function dayName(iso) {
   return names[new Date(iso + 'T12:00:00').getDay()]
 }
 
-function TripCalendar({ items }) {
+function TripCalendar({ items, selected, onSelect }) {
   function notes(iso) {
     const hits = items.filter((item) => item.date === iso)
     if (hits.length === 0) return 'Open'
@@ -228,10 +241,11 @@ function TripCalendar({ items }) {
             <p className="mb-1 text-xs text-[#1a7a78]">{dayName(iso)}</p>
             <button
               type="button"
-              onClick={() => {
-                const el = document.getElementById('plan-' + iso)
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }}
+             onClick={() => {
+  onSelect(iso)
+  const el = document.getElementById('plan-' + iso)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}}
               className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#1a7a78] bg-white text-sm text-[#3a2f29]"
             >
               {dayNum(iso)}
@@ -283,7 +297,12 @@ function Itinerary() {
     <div className="py-6">
       <h1 className="text-3xl font-semibold">Itinerary</h1>
       <p className="mt-2 text-[#7a6d62]">Add one plan at a time.</p>
-<TripCalendar items={items} />
+<TripCalendar items={items} selected={date} onSelect={setDate} />
+{date && (
+  <p className="mb-4 text-sm text-[#1a7a78]">
+    Selected {date}. Add a title below to plan this day.
+  </p>
+)}
       <div className="mt-6 grid max-w-xl gap-3">
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
