@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { auth, googleProvider } from './lib/firebase'
+import { auth, googleProvider, db } from './lib/firebase'
+import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 
 const linkClass = ({ isActive }) =>
   isActive
@@ -450,7 +451,68 @@ function Eats() {
     </div>
   )
 }
+function GearList() {
+  const [items, setItems] = useState([])
+  const [name, setName] = useState('')
 
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'basket'), (snap) => {
+      const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      setItems(next)
+    })
+    return unsub
+  }, [])
+
+  async function addItem() {
+    if (!name.trim()) return
+    await addDoc(collection(db, 'basket'), { name: name.trim(), done: false })
+    setName('')
+  }
+
+  async function toggle(id, done) {
+    await updateDoc(doc(db, 'basket', id), { done: !done })
+  }
+
+  async function removeItem(id) {
+    await deleteDoc(doc(db, 'basket', id))
+  }
+
+  return (
+    <div className="py-6">
+      <h1 className="text-3xl font-semibold">Basket</h1>
+      <p className="mt-2 text-[#7a6d62]">Add what you need. Cross it off after you buy it.</p>
+      <div className="mt-6 grid max-w-xl gap-3">
+        <input
+          type="text"
+          placeholder="Example: snorkel mask"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="rounded-lg border border-black/10 bg-white px-3 py-2"
+        />
+        <button type="button" onClick={addItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">
+          Add item
+        </button>
+      </div>
+      <ul className="mt-8 grid gap-3">
+        {items.length === 0 && <li className="text-[#7a6d62]">Nothing on the list yet.</li>}
+        {items.map((item) => (
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
+            <button
+              type="button"
+              onClick={() => toggle(item.id, item.done)}
+              className={'text-left text-lg ' + (item.done ? 'text-[#7a6d62] line-through' : '')}
+            >
+              {item.name}
+            </button>
+            <button type="button" onClick={() => removeItem(item.id)} className="text-lg text-[#1a7a78]">
+              X
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 export default function App() {
   return (
     <BrowserRouter>
@@ -466,7 +528,7 @@ export default function App() {
             <NavLink to="/" className={linkClass}>Today</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
             <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>
-            <NavLink to="/snorkel" className={linkClass}>Snorkel</NavLink>
+            <NavLink to="/snorkel" className={linkClass}>Basket</NavLink>
             <NavLink to="/eats" className={linkClass}>Eats</NavLink>
             <NavLink to="/vote" className={linkClass}>Vote</NavLink>
             <SignIn />
@@ -477,7 +539,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/itinerary" element={<Itinerary />} />
             <Route path="/tickets" element={<Tickets />} />
-            <Route path="/snorkel" element={<VoteList storageKey="snorkelVotes" list={SNORKEL} title="Snorkel spots" subtitle="Upvote the spots you want most." />} />
+            <Route path="/snorkel" element={<GearList />} />
             <Route path="/vote" element={<VoteList storageKey="activityVotes" list={ACTIVITIES} title="Vote activities" subtitle="Upvote hikes, tours, and must-dos." />} />
             <Route path="/eats" element={<Eats />} />
           </Routes>
