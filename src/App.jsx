@@ -183,7 +183,75 @@ function Home() {
     </div>
   )
 }
+const WEEK1 = [
+  '2026-12-22',
+  '2026-12-23',
+  '2026-12-24',
+  '2026-12-25',
+  '2026-12-26',
+  '2026-12-27',
+  '2026-12-28',
+]
 
+const WEEK2 = [
+  '2026-12-29',
+  '2026-12-30',
+  '2026-12-31',
+  '2027-01-01',
+  '2027-01-02',
+  '2027-01-03',
+  '2027-01-04',
+  '2027-01-05',
+]
+
+function dayNum(iso) {
+  return Number(iso.slice(8))
+}
+
+function dayName(iso) {
+  const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  return names[new Date(iso + 'T12:00:00').getDay()]
+}
+
+function TripCalendar({ items }) {
+  function notes(iso) {
+    const hits = items.filter((item) => item.date === iso)
+    if (hits.length === 0) return 'Open'
+    return hits.map((item) => item.title).join(', ')
+  }
+
+  function row(dates) {
+    return (
+      <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(' + dates.length + ', minmax(0, 1fr))' }}>
+        {dates.map((iso) => (
+          <div key={iso} className="text-center">
+            <p className="mb-1 text-xs text-[#1a7a78]">{dayName(iso)}</p>
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('plan-' + iso)
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }}
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#1a7a78] bg-white text-sm text-[#3a2f29]"
+            >
+              {dayNum(iso)}
+            </button>
+            <p className="mt-2 text-xs leading-snug text-[#7a6d62]">{notes(iso)}</p>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="mb-8 rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-3 py-4">
+      <p className="mb-4 text-center text-sm text-[#1a7a78]">Dec 22, 2026 – Jan 5, 2027</p>
+      {row(WEEK1)}
+      <div className="h-6" />
+      {row(WEEK2)}
+    </div>
+  )
+}
 function Itinerary() {
   const [items, setItems] = useState([])
   const [date, setDate] = useState('')
@@ -215,6 +283,7 @@ function Itinerary() {
     <div className="py-6">
       <h1 className="text-3xl font-semibold">Itinerary</h1>
       <p className="mt-2 text-[#7a6d62]">Add one plan at a time.</p>
+<TripCalendar items={items} />
       <div className="mt-6 grid max-w-xl gap-3">
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
