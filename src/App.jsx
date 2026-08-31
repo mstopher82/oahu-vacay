@@ -84,7 +84,16 @@ function SignIn() {
     </button>
   )
 }
-
+function weatherEmoji(text) {
+  const t = (text || '').toLowerCase()
+  if (t.includes('thunder')) return '⛈️'
+  if (t.includes('rain') || t.includes('drizzle') || t.includes('shower')) return '🌧️'
+  if (t.includes('snow')) return '❄️'
+  if (t.includes('fog') || t.includes('mist')) return '🌫️'
+  if (t.includes('cloud') || t.includes('overcast')) return '☁️'
+  if (t.includes('sun') || t.includes('clear')) return '☀️'
+  return '🌤️'
+}
 function Home() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -139,6 +148,7 @@ function Home() {
         {!weather && <p className="mt-2 text-[#7a6d62]">Loading weather…</p>}
         {weather && (
           <>
+<p className="mt-3 text-6xl">{weatherEmoji(weather.text)}</p>
             <p className="mt-2 text-4xl font-semibold text-[#1a7a78]">{weather.temp}°F</p>
             <p className="mt-1 text-lg">{weather.text}</p>
             <p className="mt-1 text-sm text-[#7a6d62]">Humidity {weather.humidity}%</p>
