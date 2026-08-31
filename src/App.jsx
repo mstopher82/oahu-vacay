@@ -191,7 +191,7 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=21.31&longitude=-157.86&c
           <label className="grid gap-1 text-sm">End date
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
           </label>
-          <button type="button" onClick={saveDates} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Save dates</button>
+          <button type="button" onClick={saveDates} className="rounded-full bg-[#e8a0b0] px-3 py-2 text-sm text-white">Save dates</button>
         </div>
       )}
     </div>
@@ -273,25 +273,22 @@ function Itinerary() {
   const [time, setTime] = useState('')
   const [title, setTitle] = useState('')
 
-  useEffect(() => {
-    const saved = localStorage.getItem('itinerary')
-    if (saved) setItems(JSON.parse(saved))
+   useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'itinerary'), (snap) => {
+      const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      next.sort((a, b) => (String(a.date) + String(a.time || '')).localeCompare(String(b.date) + String(b.time || '')))
+      setItems(next)
+    })
+    return unsub
   }, [])
-
-  function addItem() {
+  async function addItem() {
     if (!date || !title) return
-    const next = [...items, { id: Date.now(), date, time, title }]
-    next.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-    setItems(next)
-    localStorage.setItem('itinerary', JSON.stringify(next))
+    await addDoc(collection(db, 'itinerary'), { date, time, title })
     setTitle('')
     setTime('')
   }
-
-  function removeItem(id) {
-    const next = items.filter((item) => item.id !== id)
-    setItems(next)
-    localStorage.setItem('itinerary', JSON.stringify(next))
+  async function removeItem(id) {
+    await deleteDoc(doc(db, 'itinerary', id))
   }
 
   return (
@@ -334,26 +331,30 @@ function Tickets() {
   const [status, setStatus] = useState('Need to book')
 
   useEffect(() => {
-    const saved = localStorage.getItem('tickets')
-    if (saved) setItems(JSON.parse(saved))
+    const unsub = onSnapshot(collection(db, 'tickets'), (snap) => {
+      const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      setItems(next)
+    })
+    return unsub
   }, [])
 
-  function addTicket() {
+  async function addTicket() {
     if (!name) return
-    const next = [...items, { id: Date.now(), name, date, confirmation, status }]
-    setItems(next)
-    localStorage.setItem('tickets', JSON.stringify(next))
+    await addDoc(collection(db, 'tickets'), { name, date, confirmation, status })
     setName('')
     setDate('')
     setConfirmation('')
     setStatus('Need to book')
   }
-
-  function removeTicket(id) {
-    const next = items.filter((item) => item.id !== id)
-    setItems(next)
-    localStorage.setItem('tickets', JSON.stringify(next))
+  async function removeItem(id) {
+    alert('delete ' + id)
+    try {
+      await deleteDoc(doc(db, 'voteItems', id))
+    } catch (err) {
+      alert(err.message)
+    }
   }
+
 
   return (
     <div className="py-6">
@@ -513,6 +514,83 @@ function GearList() {
     </div>
   )
 }
+function ActivityVote() {
+  const [items, setItems] = useState([])
+  const [name, setName] = useState('')
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'voteItems'), (snap) => {
+      const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      next.sort((a, b) => (b.hearts || 0) - (a.hearts || 0))
+      setItems(next)
+    })
+    return unsub
+  }, [])
+
+  async function addItem() {
+    if (!name.trim()) return
+    await addDoc(collection(db, 'voteItems'), { name: name.trim(), hearts: 0 })
+    setName('')
+  }
+  async function heart(id) {
+  async function removeItem(id) {
+    alert('delete ' + id)
+    try {
+      await deleteDoc(doc(db, 'voteItems', id))
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+    async function removeItem(id) {
+    await deleteDoc(doc(db, 'voteItems', id))
+  }
+const item = items.find((i) => i.id === id)
+    const next = Number(item && item.hearts ? item.hearts : 0) + 1
+    await updateDoc(doc(db, 'voteItems', id), { hearts: next })
+  }
+  return (
+    <div className="py-6">
+      <h1 className="text-3xl font-semibold">Vote activities</h1>
+      <p className="mt-2 text-[#7a6d62]">Add an idea, then heart the ones you want most.</p>
+      <div className="mt-6 grid max-w-xl gap-3">
+        <input
+          type="text"
+          placeholder="Example: Pearl Harbor"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="rounded-lg border border-black/10 bg-white px-3 py-2"
+        />
+        <button type="button" onClick={addItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">
+          Add suggestion
+        </button>
+      </div>
+      <ul className="mt-8 grid gap-3">
+        {items.length === 0 && <li className="text-[#7a6d62]">No suggestions yet.</li>}
+        {items.map((item) => (
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
+            <p className="text-lg">{item.name}</p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => heart(item.id)}
+                className="rounded-full bg-[#1a7a78] px-3 py-2 text-sm text-white"
+              >
+                <span className="text-[#e8a0b0]">♥</span> {item.hearts || 0}
+              </button>
+              <button
+                type="button"
+                onClick={() => removeItem(item.id)}
+                className="text-lg text-[#1a7a78]"
+              >
+                X
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 export default function App() {
   return (
     <BrowserRouter>
@@ -540,7 +618,7 @@ export default function App() {
             <Route path="/itinerary" element={<Itinerary />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/snorkel" element={<GearList />} />
-            <Route path="/vote" element={<VoteList storageKey="activityVotes" list={ACTIVITIES} title="Vote activities" subtitle="Upvote hikes, tours, and must-dos." />} />
+            <Route path="/vote" element={<ActivityVote />} />
             <Route path="/eats" element={<Eats />} />
           </Routes>
         </main>
