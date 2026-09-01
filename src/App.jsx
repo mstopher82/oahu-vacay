@@ -160,7 +160,6 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=21.31&longitude=-157.86&c
 
       <div className="mx-auto mt-8 max-w-[420px] rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-5 py-4 text-center">
         <p className="text-sm uppercase tracking-widest text-[#1a7a78]">Honolulu today</p>
-        {!weather && <p className="mt-2 text-[#7a6d62]">Loading weather…</p>}
         {weather && (
           <>
 <p className="mt-3 text-6xl">{weatherEmoji(weather.text)}</p>
@@ -252,7 +251,6 @@ function TripCalendar({ items, selected, onSelect }) {
             >
               {dayNum(iso)}
             </button>
-            <p className="mt-2 text-xs leading-snug text-[#7a6d62]">{notes(iso)}</p>
           </div>
         ))}
       </div>
@@ -273,8 +271,10 @@ function Itinerary() {
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [title, setTitle] = useState('')
+  const [details, setDetails] = useState('')
+  const [openId, setOpenId] = useState(null)
 
-   useEffect(() => {
+  useEffect(() => {
     const unsub = onSnapshot(collection(db, 'itinerary'), (snap) => {
       const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
       next.sort((a, b) => (String(a.date) + String(a.time || '')).localeCompare(String(b.date) + String(b.time || '')))
@@ -284,9 +284,10 @@ function Itinerary() {
   }, [])
   async function addItem() {
     if (!date || !title) return
-    await addDoc(collection(db, 'itinerary'), { date, time, title })
+    await addDoc(collection(db, 'itinerary'), { date, time, title, details })
     setTitle('')
     setTime('')
+    setDetails('')
   }
   async function removeItem(id) {
     await deleteDoc(doc(db, 'itinerary', id))
@@ -306,19 +307,37 @@ function Itinerary() {
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
         <input type="text" placeholder="Example: Hanauma Bay snorkel" value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
+        <textarea
+          placeholder="Details (optional)"
+          value={details}
+          onChange={(e) => setDetails(e.target.value)}
+          className="rounded-lg border border-black/10 bg-white px-3 py-2"
+        />
         <button type="button" onClick={addItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Add to itinerary</button>
       </div>
       <ul className="mt-8 grid gap-3">
         {items.length === 0 && <li className="text-[#7a6d62]">Nothing planned yet.</li>}
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
-            <div>
-              <p className="text-sm text-[#1a7a78]">{item.date} {item.time}</p>
-              <p className="text-lg">{item.title}</p>
+          <li key={item.id} className="rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setOpenId(openId === item.id ? null : item.id)}
+                className="min-w-0 flex-1 text-left"
+              >
+                <p className="text-sm text-[#1a7a78]">{item.date} {item.time}</p>
+                <p className="text-lg">{item.title}</p>
+                {openId === item.id && (
+                  <p className="mt-3 text-sm text-[#7a6d62]">
+                    {item.details || 'No details yet.'}
+                  </p>
+                )}
+              </button>
+              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">
+                Remove
+              </button>
             </div>
-            <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">Remove</button>
-          </li>
-        ))}
+          </li>        ))}
       </ul>
     </div>
   )
@@ -375,14 +394,26 @@ function Tickets() {
       <ul className="mt-8 grid gap-3">
         {items.length === 0 && <li className="text-[#7a6d62]">No tickets yet.</li>}
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
-            <div>
-              <p className="text-lg">{item.name}</p>
-              <p className="text-sm text-[#1a7a78]">{item.status}</p>
+          <li key={item.id} className="rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+ onClick={() => alert('open')}
+                className="min-w-0 flex-1 text-left"
+              >
+                <p className="text-sm text-[#1a7a78]">{item.date} {item.time}</p>
+                <p className="text-lg">{item.title}</p>
+              </button>
+              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">
+                Remove
+              </button>
             </div>
-            <button type="button" onClick={() => removeTicket(item.id)} className="text-sm text-[#7a6d62]">Remove</button>
-          </li>
-        ))}
+            {openId === item.id && (
+              <p className="mt-3 text-sm text-[#7a6d62]">
+                {item.details || 'No details yet.'}
+              </p>
+            )}
+          </li>        ))}
       </ul>
     </div>
   )
