@@ -532,22 +532,17 @@ function ActivityVote() {
     await addDoc(collection(db, 'voteItems'), { name: name.trim(), hearts: 0 })
     setName('')
   }
+
   async function heart(id) {
-  async function removeItem(id) {
-    alert('delete ' + id)
-    try {
-      await deleteDoc(doc(db, 'voteItems', id))
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-    async function removeItem(id) {
-    await deleteDoc(doc(db, 'voteItems', id))
-  }
-const item = items.find((i) => i.id === id)
+    const item = items.find((i) => i.id === id)
     const next = Number(item && item.hearts ? item.hearts : 0) + 1
     await updateDoc(doc(db, 'voteItems', id), { hearts: next })
   }
+
+  async function removeItem(id) {
+    await deleteDoc(doc(db, 'voteItems', id))
+  }
+
   return (
     <div className="py-6">
       <h1 className="text-3xl font-semibold">Vote activities</h1>
@@ -594,8 +589,8 @@ const item = items.find((i) => i.id === id)
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#f3eee4] text-[#3a2f29]">
-        <div className="sticky top-0 z-20 bg-[#f3eee4]">
+      <div className="min-h-screen overflow-y-scroll bg-[#f3eee4] text-[#3a2f29]">
+                <div className="sticky top-0 z-20 rounded-b-3xl border-b-2 border-[#1a7a78] bg-[#f3eee4]">
           <div className="hawaii-hero">
             <div>
               <p className="aloha">Aloha</p>
@@ -612,6 +607,7 @@ export default function App() {
             <SignIn />
           </nav>
         </div>
+                <div className="rounded-t-3xl border-t border-[#e7dccb] bg-[#f7f2e9] pt-2">
         <main className="mx-auto max-w-5xl px-4 pb-16">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -622,6 +618,7 @@ export default function App() {
             <Route path="/eats" element={<Eats />} />
           </Routes>
         </main>
+        </div>
       </div>
     </BrowserRouter>
   )
