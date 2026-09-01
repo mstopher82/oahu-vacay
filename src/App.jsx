@@ -590,13 +590,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen overflow-y-scroll bg-[#f3eee4] text-[#3a2f29]">
-                <div className="sticky top-0 z-20 rounded-b-3xl border-b-2 border-[#1a7a78] bg-[#f3eee4]">
+                <div className="relative z-0 bg-[#f3eee4]">
           <div className="hawaii-hero">
             <div>
               <p className="aloha">Aloha</p>
               <h1 className="title">Oahu Vacay</h1>
             </div>
           </div>
+        </div>
+            <div className="relative z-30 -mt-4 rounded-t-3xl bg-[#f7f2e9] pt-2">
           <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
             <NavLink to="/" className={linkClass}>Today</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
@@ -606,18 +608,16 @@ export default function App() {
             <NavLink to="/vote" className={linkClass}>Vote</NavLink>
             <SignIn />
           </nav>
-        </div>
-                <div className="rounded-t-3xl border-t border-[#e7dccb] bg-[#f7f2e9] pt-2">
-        <main className="mx-auto max-w-5xl px-4 pb-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/itinerary" element={<Itinerary />} />
-            <Route path="/tickets" element={<Tickets />} />
-            <Route path="/snorkel" element={<GearList />} />
-            <Route path="/vote" element={<ActivityVote />} />
-            <Route path="/eats" element={<Eats />} />
-          </Routes>
-        </main>
+          <main className="mx-auto max-w-5xl px-4 pb-16">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/itinerary" element={<Itinerary />} />
+              <Route path="/tickets" element={<Tickets />} />
+              <Route path="/snorkel" element={<GearList />} />
+              <Route path="/vote" element={<ActivityVote />} />
+              <Route path="/eats" element={<Eats />} />
+            </Routes>
+          </main>
         </div>
       </div>
     </BrowserRouter>
