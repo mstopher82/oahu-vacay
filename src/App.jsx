@@ -660,7 +660,9 @@ function Pics() {
         {items.length === 0 && <p className="text-[#7a6d62]">No photos yet.</p>}
         {items.map((item) => (
           <div key={item.id} className="rounded-2xl border border-[#e7dccb] bg-white p-3">
-            <img src={item.url} alt={item.name} className="h-48 w-full rounded-xl object-cover" />
+            <a href={item.url} target="_blank" rel="noreferrer">
+              <img src={item.url} alt={item.name} className="h-48 w-full rounded-xl object-cover" />
+            </a>
             <div className="mt-2 flex items-center justify-between">
               <p className="truncate text-sm text-[#7a6d62]">{item.name}</p>
               <button type="button" onClick={() => removePic(item)} className="text-lg text-[#1a7a78]">
