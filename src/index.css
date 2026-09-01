@@ -84,11 +84,7 @@ body {
 }
 .cream-panel {
   background-color: #f7f2e9;
-  background-image:
-    radial-gradient(circle at 50% 32%, rgba(232, 160, 176, 0.28) 0 9px, transparent 10px),
-    radial-gradient(circle at 50% 68%, rgba(232, 160, 176, 0.28) 0 9px, transparent 10px),
-    radial-gradient(circle at 32% 50%, rgba(232, 160, 176, 0.28) 0 9px, transparent 10px),
-    radial-gradient(circle at 68% 50%, rgba(232, 160, 176, 0.28) 0 9px, transparent 10px),
-    radial-gradient(circle at 50% 50%, rgba(232, 160, 176, 0.4) 0 5px, transparent 6px);
-  background-size: 120px 120px;
+  background-image: url('/plumeria.svg');
+  background-size: 220px 220px;
+  background-repeat: repeat;
 }

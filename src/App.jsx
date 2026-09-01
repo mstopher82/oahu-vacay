@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { auth, googleProvider, db } from './lib/firebase'
+import { auth, googleProvider, db, storage } from './lib/firebase'
 import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 const linkClass = ({ isActive }) =>
   isActive
@@ -586,6 +587,75 @@ function ActivityVote() {
     </div>
   )
 }
+function Pics() {
+  const [items, setItems] = useState([])
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'pics'), (snap) => {
+      const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      next.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      setItems(next)
+    })
+    return unsub
+  }, [])
+
+  async function uploadFile(e) {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    setBusy(true)
+    try {
+      const path = 'pics/' + Date.now() + '-' + file.name
+      const fileRef = ref(storage, path)
+      await uploadBytes(fileRef, file)
+      const url = await getDownloadURL(fileRef)
+      await addDoc(collection(db, 'pics'), {
+        url,
+        path,
+        name: file.name,
+        createdAt: new Date().toISOString(),
+      })
+    } catch (err) {
+      alert(err.message)
+    }
+    setBusy(false)
+    e.target.value = ''
+  }
+
+  async function removePic(item) {
+    try {
+      if (item.path) await deleteObject(ref(storage, item.path))
+      await deleteDoc(doc(db, 'pics', item.id))
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  return (
+    <div className="py-6">
+      <h1 className="text-3xl font-semibold">Pics</h1>
+      <p className="mt-2 text-[#7a6d62]">Upload a photo from the trip. X deletes it.</p>
+      <label className="mt-6 inline-block rounded-full bg-[#1a7a78] px-4 py-2 text-white">
+        {busy ? 'Uploading…' : 'Upload photo'}
+        <input type="file" accept="image/*" className="hidden" onChange={uploadFile} />
+      </label>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        {items.length === 0 && <p className="text-[#7a6d62]">No photos yet.</p>}
+        {items.map((item) => (
+          <div key={item.id} className="rounded-2xl border border-[#e7dccb] bg-white p-3">
+            <img src={item.url} alt={item.name} className="h-48 w-full rounded-xl object-cover" />
+            <div className="mt-2 flex items-center justify-between">
+              <p className="truncate text-sm text-[#7a6d62]">{item.name}</p>
+              <button type="button" onClick={() => removePic(item)} className="text-lg text-[#1a7a78]">
+                X
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 export default function App() {
   return (
     <BrowserRouter>
@@ -598,13 +668,14 @@ export default function App() {
             </div>
           </div>
         </div>
-            <div className="relative z-30 -mt-4 rounded-t-3xl bg-[#f7f2e9] pt-2">
-          <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
+            <div className="cream-panel relative z-30 -mt-10 rounded-t-3xl bg-[#f7f2e9] pt-2">
+                    <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
             <NavLink to="/" className={linkClass}>Today</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
             <NavLink to="/tickets" className={linkClass}>Tickets</NavLink>
             <NavLink to="/snorkel" className={linkClass}>Basket</NavLink>
             <NavLink to="/eats" className={linkClass}>Eats</NavLink>
+            <NavLink to="/pics" className={linkClass}>Pics</NavLink>
             <NavLink to="/vote" className={linkClass}>Vote</NavLink>
             <SignIn />
           </nav>
@@ -616,6 +687,7 @@ export default function App() {
               <Route path="/snorkel" element={<GearList />} />
               <Route path="/vote" element={<ActivityVote />} />
               <Route path="/eats" element={<Eats />} />
+            <Route path="/pics" element={<Pics />} />
             </Routes>
           </main>
         </div>
