@@ -110,14 +110,14 @@ function weatherEmoji(text) {
   return '🌤️'
 }
 function Home() {
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useState('2026-12-22')
+  const [endDate, setEndDate] = useState('2027-01-05')
   const [editing, setEditing] = useState(false)
   const [weather, setWeather] = useState(null)
 
   useEffect(() => {
-    setStartDate(localStorage.getItem('tripStart') || '')
-    setEndDate(localStorage.getItem('tripEnd') || '')
+    setStartDate(localStorage.getItem('tripStart') || '2026-12-22')
+    setEndDate(localStorage.getItem('tripEnd') || '2027-01-05')
 fetch('https://api.open-meteo.com/v1/forecast?latitude=21.31&longitude=-157.86&current=temperature_2m,relative_humidity_2m,weather_code&temperature_unit=fahrenheit')
   .then((res) => res.json())
   .then((data) => {
@@ -668,7 +668,7 @@ export default function App() {
             </div>
           </div>
         </div>
-            <div className="cream-panel relative z-30 -mt-10 rounded-t-3xl bg-[#f7f2e9] pt-2">
+            <div className="relative z-30 -mt-10 rounded-t-3xl bg-[#f7f2e9] pt-2">
                     <nav className="flex flex-wrap items-center justify-center gap-2 px-3 py-4">
             <NavLink to="/" className={linkClass}>Today</NavLink>
             <NavLink to="/itinerary" className={linkClass}>Itinerary</NavLink>
