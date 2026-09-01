@@ -366,15 +366,10 @@ function Tickets() {
     setConfirmation('')
     setStatus('Need to book')
   }
-  async function removeItem(id) {
-    alert('delete ' + id)
-    try {
-      await deleteDoc(doc(db, 'voteItems', id))
-    } catch (err) {
-      alert(err.message)
-    }
-  }
 
+  async function removeTicket(id) {
+    await deleteDoc(doc(db, 'tickets', id))
+  }
 
   return (
     <div className="py-6">
@@ -394,31 +389,22 @@ function Tickets() {
       <ul className="mt-8 grid gap-3">
         {items.length === 0 && <li className="text-[#7a6d62]">No tickets yet.</li>}
         {items.map((item) => (
-          <li key={item.id} className="rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
- onClick={() => alert('open')}
-                className="min-w-0 flex-1 text-left"
-              >
-                <p className="text-sm text-[#1a7a78]">{item.date} {item.time}</p>
-                <p className="text-lg">{item.title}</p>
-              </button>
-              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">
-                Remove
-              </button>
+          <li key={item.id} className="flex items-center justify-between rounded-2xl border border-[#e7dccb] bg-[#f7f2e9] px-4 py-3">
+            <div>
+              <p className="text-lg">{item.name}</p>
+              <p className="text-sm text-[#1a7a78]">{item.status}</p>
+              {item.date && <p className="text-sm text-[#7a6d62]">{item.date}</p>}
+              {item.confirmation && <p className="text-sm text-[#7a6d62]">{item.confirmation}</p>}
             </div>
-            {openId === item.id && (
-              <p className="mt-3 text-sm text-[#7a6d62]">
-                {item.details || 'No details yet.'}
-              </p>
-            )}
-          </li>        ))}
+            <button type="button" onClick={() => removeTicket(item.id)} className="text-sm text-[#7a6d62]">
+              Remove
+            </button>
+          </li>
+        ))}
       </ul>
     </div>
   )
 }
-
 function VoteList({ storageKey, list, title, subtitle }) {
   const [votes, setVotes] = useState(() => loadVotes(storageKey, list))
 
@@ -670,7 +656,7 @@ function Pics() {
         {busy ? 'Uploading…' : 'Upload photo'}
         <input type="file" accept="image/*" className="hidden" onChange={uploadFile} />
       </label>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-3 gap-4">
         {items.length === 0 && <p className="text-[#7a6d62]">No photos yet.</p>}
         {items.map((item) => (
           <div key={item.id} className="rounded-2xl border border-[#e7dccb] bg-white p-3">
