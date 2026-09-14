@@ -273,6 +273,7 @@ function Itinerary() {
   const [title, setTitle] = useState('')
   const [details, setDetails] = useState('')
   const [openId, setOpenId] = useState(null)
+  const [editId, setEditId] = useState(null)
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'itinerary'), (snap) => {
@@ -282,27 +283,43 @@ function Itinerary() {
     })
     return unsub
   }, [])
-  async function addItem() {
+
+  async function saveItem() {
     if (!date || !title) return
-    await addDoc(collection(db, 'itinerary'), { date, time, title, details })
+    if (editId) {
+      await updateDoc(doc(db, 'itinerary', editId), { date, time, title, details })
+      setEditId(null)
+    } else {
+      await addDoc(collection(db, 'itinerary'), { date, time, title, details })
+    }
     setTitle('')
     setTime('')
     setDetails('')
   }
+
+  function startEdit(item) {
+    setEditId(item.id)
+    setDate(item.date || '')
+    setTime(item.time || '')
+    setTitle(item.title || '')
+    setDetails(item.details || '')
+  }
+
   async function removeItem(id) {
     await deleteDoc(doc(db, 'itinerary', id))
+    if (editId === id) setEditId(null)
   }
 
   return (
     <div className="py-6">
       <h1 className="text-3xl font-semibold">Itinerary</h1>
       <p className="mt-2 text-[#7a6d62]">Add one plan at a time.</p>
-<TripCalendar items={items} selected={date} onSelect={setDate} />
-{date && (
-  <p className="mb-4 text-sm text-[#1a7a78]">
-    Selected {date}. Add a title below to plan this day.
-  </p>
-)}
+      <TripCalendar items={items} selected={date} onSelect={setDate} />
+      {date && (
+        <p className="mb-4 text-sm text-[#1a7a78]">
+          Selected {date}. {editId ? 'Editing this plan.' : 'Add a title below to plan this day.'}
+        </p>
+      )}
       <div className="mt-6 grid max-w-xl gap-3">
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-lg border border-black/10 bg-white px-3 py-2" />
@@ -313,7 +330,9 @@ function Itinerary() {
           onChange={(e) => setDetails(e.target.value)}
           className="rounded-lg border border-black/10 bg-white px-3 py-2"
         />
-        <button type="button" onClick={addItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">Add to itinerary</button>
+        <button type="button" onClick={saveItem} className="rounded-full bg-[#1a7a78] px-4 py-2 text-white">
+          {editId ? 'Save changes' : 'Add to itinerary'}
+        </button>
       </div>
       <ul className="mt-8 grid gap-3">
         {items.length === 0 && <li className="text-[#7a6d62]">Nothing planned yet.</li>}
@@ -333,11 +352,17 @@ function Itinerary() {
                   </p>
                 )}
               </button>
-              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">
-                Remove
-              </button>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => startEdit(item)} className="text-sm text-[#1a7a78]">
+                  Edit
+                </button>
+                <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-[#7a6d62]">
+                  Remove
+                </button>
+              </div>
             </div>
-          </li>        ))}
+          </li>
+        ))}
       </ul>
     </div>
   )
